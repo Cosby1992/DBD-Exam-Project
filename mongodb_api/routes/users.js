@@ -3,77 +3,117 @@ var router = express.Router();
 
 const MongoClient = require("mongodb").MongoClient;
 
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
 // Connection URL
-const url = "mongodb://mongo:27017";
+//const url = "mongodb://mongo:27017";
 
-// Database Name
-const client = new MongoClient(url, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+const url = "mongodb://localhost:27017";
 
 /** POST -> CREATE USER */
 router.post("/", async (req, res, next) => {
+  // Database Name
+  const client = new MongoClient(url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
 
-  if(!req.body.email || !req.body.password || !req.body.displayname){
-    res.send({error: "email, password or displayname missing"})
+  var database = null;
+  var usersCollection = null;
+
+  try {
+    await client.connect();
+    database = client.db("api");
+    usersCollection = database.collection("users");
+  } catch (err) {
+    res.send({ error: "Failed to connect to database" });
+    await client.close();
     return;
   }
 
+  if (req.body.email) {
+    try {
+      const result = await usersCollection.findOne({ email: req.body.email });
+
+      if (result) {
+        res.send({ error: "email already exists in database" });
+        await client.close();
+        return;
+      }
+    } catch (err) {
+      res.send({ error: "Failed to contact to database" });
+      await client.close();
+      return;
+    }
+  }
+
+  if (!req.body.email || !req.body.password || !req.body.displayname) {
+    res.send({ error: "email, password or displayname missing" });
+    return;
+  }
+
+  // create a document to be inserted
+  var doc = {
+    email: req.body.email,
+    password: req.body.password,
+    displayname: req.body.displayname,
+  };
+
+  if (req.body.firstname) {
+    doc.firstname = req.body.firstname;
+  }
+
+  if (req.body.lastname) {
+    doc.lastname = req.body.lastname;
+  }
+
   try {
-    // Database Name
-    const client = new MongoClient(url, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    const result = await usersCollection.insertOne(doc);
 
-    await client.connect();
-
-    const database = client.db("api");
-    const users = database.collection("users");
-
-    // create a document to be inserted
-    const doc = {
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-    };
-
-    const result = await users.insertOne(doc);
-
-    res.send({
-      insertedId: result.insertedId,
-      insertedCount: result.insertedCount,
-    });
+    if (result) {
+      res.send({
+        insertedId: result.insertedId,
+        insertedCount: result.insertedCount,
+      });
+    } else {
+      res.send({ error: "Failed to insert in database" });
+    }
   } catch (err) {
-    res.status(500);
-    res.send("Failed to connect to database");
+    res.send({ error: "Failed to contact to database" });
   } finally {
     await client.close();
   }
 });
 
-/* GET -> GET USER <ID> */
+/* GET -> GET USER <EMAIL> */
 router.get("/", async (req, res, next) => {
-  try {
-    // Database Name
-    const client = new MongoClient(url, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+  // Database Name
+  const client = new MongoClient(url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
 
+  try {
     await client.connect();
 
     const database = client.db("api");
     const users = database.collection("users");
 
-    // create a document to be inserted
-    const query = { firstname: req.params.firstname };
-    const user = await users.findOne(query);
+    var mongo_query;
 
-    res.send(user);
+    if (req.query.email) {
+      mongo_query = { email: req.query.email };
+    } else {
+      mongo_query = { displayname: req.query.displayname };
+    }
+
+    const user = await users.findOne(mongo_query);
+
+    if(user) res.send(user);
+    else res.send({error: "No user found"})
+
+
   } catch (err) {
     console.error(err);
     res.status(500);
@@ -83,14 +123,67 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.put("/", (req, res, next) => {
-  // respond "501 - not implemented"
-  res.sendStatus(501);
+router.put("/", async (req, res, next) => {
+  if (!req.query.email) {
+    res.send({ error: "email is missing" });
+    return;
+  }
+
+  // Database Name
+  const client = new MongoClient(url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+
+  try {
+    await client.connect();
+
+    const database = client.db("api");
+    const users = database.collection("users");
+
+    req.body.lastupdated = new Date().toUTCString();
+
+    result = await users.updateOne(
+      { email: req.query.email },
+      { $set: req.body }
+    );
+
+    res.send({ modifiedCount: result.modifiedCount });
+    return;
+
+  } catch (err) {
+    res.send({ error: "Failed to connect to db" });
+  } finally {
+    await client.close();
+  }
 });
 
-router.delete("/", (req, res, next) => {
-  // respond "501 - not implemented"
-  res.sendStatus(501);
+router.delete("/", async (req, res, next) => {
+  if (!req.query.email) {
+    res.send({ error: "email is missing" });
+    return;
+  }
+
+  // Database Name
+  const client = new MongoClient(url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+
+  try {
+    await client.connect();
+
+    const database = client.db("api");
+    const users = database.collection("users");
+
+    result = await users.deleteOne({ email: req.query.email });
+
+    res.send({ deletedCount: result.deletedCount });
+  } catch (err) {
+    res.send({ error: "Failed to connect to db" });
+  } finally {
+    await client.close();
+  }
 });
 
 module.exports = router;

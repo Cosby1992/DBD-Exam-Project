@@ -1,0 +1,21 @@
+version: '3.4'
+
+services:
+  express_api:
+    image: nodejs_server
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:3000
+  neo4j:
+    image: neo4j:latest
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - neo4j_data:/data/db
+    env_file:
+      - .env.neo4j
+volumes:
+ neo4j_data:
