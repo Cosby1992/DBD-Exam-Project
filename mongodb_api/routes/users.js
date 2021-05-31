@@ -7,9 +7,8 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
 // Connection URL
-//const url = "mongodb://mongo:27017";
-
-const url = "mongodb://localhost:27017";
+const url = "mongodb://mongo:27017";
+//const url = "mongodb://localhost:27017";
 
 /** POST -> CREATE USER */
 router.post("/", async (req, res, next) => {
@@ -27,7 +26,6 @@ router.post("/", async (req, res, next) => {
     database = client.db("api");
     usersCollection = database.collection("users");
   } catch (err) {
-    res.status(500);
     res.send({ error: "Failed to connect to database" });
     await client.close();
     return;
@@ -38,13 +36,11 @@ router.post("/", async (req, res, next) => {
       const result = await usersCollection.findOne({ email: req.body.email });
 
       if (result) {
-        res.status(409);
         res.send({ error: "email already exists in database" });
         await client.close();
         return;
       }
     } catch (err) {
-      res.status(500);
       res.send({ error: "Failed to contact to database" });
       await client.close();
       return;
@@ -52,7 +48,6 @@ router.post("/", async (req, res, next) => {
   }
 
   if (!req.body.email || !req.body.password || !req.body.displayname) {
-    res.status(400);
     res.send({ error: "email, password or displayname missing" });
     return;
   }
@@ -81,11 +76,9 @@ router.post("/", async (req, res, next) => {
         insertedCount: result.insertedCount,
       });
     } else {
-      res.status(500)
       res.send({ error: "Failed to insert in database" });
     }
   } catch (err) {
-    res.status(500)
     res.send({ error: "Failed to contact to database" });
   } finally {
     await client.close();

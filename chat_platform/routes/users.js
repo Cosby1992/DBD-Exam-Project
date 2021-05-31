@@ -1,25 +1,22 @@
 var express = require("express");
 var router = express.Router();
 
-var https = require("https");
+var request = require("request");
 
 /* POST - Create user */
 router.post("/", function (req, res, next) {
-  const request = createRequest("localhost", 8000, "/users", "POST", req.body);
-
-  const requestRes = https.request(request, (result) => {
-    console.log(`statusCode: ${result.statusCode}`);
-
-    result.on("data", (d) => {
-      console.log(d);
-    });
-  });
-
-  requestRes.on("error", (error) => {
-    console.error(error);
-  });
-
-  res.status(200).json({ message: "OK" });
+  request(
+    {
+      url: "http://localhost:8000/users",
+      method: "POST",
+      json: true, // <--Very important!!!
+      body: req.body,
+    },
+    function (error, response, body) {
+      console.log(response);
+      res.json(body);
+    }
+  );
 });
 
 /* GET - Get user */
@@ -51,7 +48,6 @@ createRequest = (
     path: path,
     headers: {
       "Content-Type": "application/json",
-      "Content-Length": data.length,
     },
     body: data,
   };
