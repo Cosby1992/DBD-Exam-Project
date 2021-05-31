@@ -206,6 +206,7 @@ router.get("/recommendations", async (req, res, next) => {
     defaultAccessMode: neo4j.session.WRITE,
   })
     .run(`MATCH (user:User {id:'${req.query.id}'}) - [:FRIENDS*2..2] - (friendRecommendation:User)
+          WHERE NOT (user:User {id:'${req.query.id}'}) - [:FRIENDS*1..1] - (friendRecommendation:User)
           RETURN DISTINCT gds.alpha.linkprediction.commonNeighbors(user, friendRecommendation, {
               relationshipQuery:"FRIENDS",
               direction:"BOTH"
@@ -217,12 +218,57 @@ router.get("/recommendations", async (req, res, next) => {
 
   result.records.forEach((entry) => {
     responseJsonArray.push({
-      recommendedUser: {
+      friend: {
         id: entry.get(1).properties.id,
         age: entry.get(1).properties.age.low,
         gender: entry.get(1).properties.gender,
       },
       numberOfCommonFriends: entry.get(0),
+    });
+  });
+
+  res.json(responseJsonArray);
+});
+
+// Get a list of users friends based on user id
+router.get("/all", async (req, res, next) => {
+  // Check if id param is present
+  if (!req.query.id) {
+    res.status(400);
+    res.json({ error: "Missing parameter: id" });
+    return;
+  }
+
+  // Check if id exists in database
+  const usersFound = await db
+    .session({
+      database: "neo4j",
+      defaultAccessMode: neo4j.session.WRITE,
+    })
+    .run(`MATCH (user:User) WHERE user.id = '${req.query.id}' RETURN (user);`);
+
+  // If there's no user with that id, return error
+  if (usersFound.records.length === 0) {
+    res.status(400);
+    res.json({ error: "No user found with id: " + req.query.id });
+    return;
+  }
+
+  const allFriends = await db.session({
+    database: "neo4j",
+    defaultAccessMode: neo4j.session.WRITE,
+  })
+    .run(`MATCH(user:User {id: '${req.query.id}'})-[:FRIENDS*1..1]-(myFriends:User) return myFriends`);
+
+  var responseJsonArray = [];
+
+  allFriends.records.forEach((entry) => {
+    responseJsonArray.push({
+      recommendedUser: {
+        id: entry.get(0).properties.id,
+        age: entry.get(0).properties.age.low,
+        gender: entry.get(0).properties.gender,
+      }
     });
   });
 
