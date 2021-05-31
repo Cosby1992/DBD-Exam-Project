@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="dk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="stylesheets/global.css">
+    <link rel="stylesheet" href="stylesheets/index.css">
+</head>
+
+<body>
+
+    <div id="page-wrapper">
+
+        <div id="image-container">
+            <img id="frontpage-image-friends" src="images/frontpage-image-friends.jpg" alt="Friend image">
+            <div id="image-overlay"></div>
+        </div>
+
+
+        <div id="login-box-wrapper">
+
+            <div id="login-box">
+
+                <h1>CHAT PLATFORM</h1>
+
+                <form action="/login" method="post">
+
+                    <div id="form-input-wrapper">
+
+                        <div class="input-wrapper">
+                            <object class="input-svg" data="images/at-sign.svg" alt=""></object>
+                            <input type="email" placeholder="Email" name="email" required>
+                        </div>
+                        <div class="input-wrapper">
+                            <object class="input-svg" data="images/lock.svg" alt=""></object>
+                            <input type="password" placeholder="********" name="pwd" required>
+                        </div>
+                        
+                        
+
+                        <button type="submit">LOG IND</button>
+
+                        
+
+                    </div>
+
+
+                </form>
+
+                <div>Har du ikke en bruger? <a href="/createuser">Opret Bruger</a></div>
+
+
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+
+</body>
+
+</html>
