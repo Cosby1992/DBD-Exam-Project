@@ -264,7 +264,7 @@ router.get("/all", async (req, res, next) => {
 
   allFriends.records.forEach((entry) => {
     responseJsonArray.push({
-      recommendedUser: {
+      user: {
         id: entry.get(0).properties.id,
         age: entry.get(0).properties.age.low,
         gender: entry.get(0).properties.gender,
@@ -272,7 +272,7 @@ router.get("/all", async (req, res, next) => {
     });
   });
 
-  res.json(responseJsonArray);
+  res.json({friends: responseJsonArray});
 });
 
 module.exports = router;

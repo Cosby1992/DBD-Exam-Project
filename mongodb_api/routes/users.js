@@ -36,19 +36,22 @@ router.post("/", async (req, res, next) => {
       const result = await usersCollection.findOne({ email: req.body.email });
 
       if (result) {
-        res.send({ error: "email already exists in database" });
+        res.status(409) // duplicate entry
+        res.json({ error: "Email already exists in database" });
         await client.close();
         return;
       }
     } catch (err) {
-      res.send({ error: "Failed to contact to database" });
+      res.status(500) // duplicate entry
+      res.json({ error: "Failed to contact to database" });
       await client.close();
       return;
     }
   }
 
   if (!req.body.email || !req.body.password || !req.body.displayname) {
-    res.send({ error: "email, password or displayname missing" });
+    res.status(400) // bad request
+    res.json({ error: "email, password or displayname missing" });
     return;
   }
 
@@ -71,15 +74,17 @@ router.post("/", async (req, res, next) => {
     const result = await usersCollection.insertOne(doc);
 
     if (result) {
-      res.send({
+      res.json({
         insertedId: result.insertedId,
         insertedCount: result.insertedCount,
       });
     } else {
-      res.send({ error: "Failed to insert in database" });
+      res.status(500)
+      res.json({ error: "Failed to insert in database" });
     }
   } catch (err) {
-    res.send({ error: "Failed to contact to database" });
+    res.status(500)
+    res.json({ error: "Failed to contact to database" });
   } finally {
     await client.close();
   }
@@ -109,8 +114,8 @@ router.get("/", async (req, res, next) => {
 
     const user = await users.findOne(mongo_query);
 
-    if(user) res.send(user);
-    else res.send({error: "No user found"})
+    if(user) res.json(user);
+    else res.status(404).json({error: "No user found"})
 
 
   } catch (err) {
