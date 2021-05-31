@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - 8080:3000
+      - 8001:3000
   neo4j:
     image: neo4j:latest
     ports:
