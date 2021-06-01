@@ -36,8 +36,8 @@ router.post("/", (req, res, next) => {
         console.log(userobject);
 
         requestTool.post("localhost:8001/users", userobject).then((neo4jresult) => {
-        res.status(neo4jresult.response.statusCode);
-        res.json(neo4jresult.body);
+        res.status(result.response.statusCode);
+        res.json(result.body);
 
       })
       .catch(err => {
