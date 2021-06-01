@@ -63,9 +63,10 @@ router.get("/", function (req, res, next) {
     requestTool.get("localhost:8000/users?email=" + req.query.email).then(result => {
 
     res.status(result.response.statusCode);
-      res.json(JSON.parse(result.body));
+    res.json(result.body);
 
     }).catch(err => {
+        console.log(err);
         res.status(500);
         res.json({ error: "Failed to contact database.", message: err });
     })
@@ -74,31 +75,12 @@ router.get("/", function (req, res, next) {
 
 /* PUT - Update user */
 router.post("/", function (req, res, next) {
-  res.status(200).json({ message: "OK" });
+  res.status(501).json({ message: "Not implemented" });
 });
 
 /* DELETE - Delete user */
 router.post("/", function (req, res, next) {
-  res.status(200).json({ message: "OK" });
+  res.status(501).json({ message: "Not implemented" });
 });
-
-createRequest = (
-  url = "",
-  port = 8080,
-  path = "",
-  method = "GET",
-  data = {}
-) => {
-  return {
-    hostname: url,
-    port: port,
-    method: method,
-    path: path,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: data,
-  };
-};
 
 module.exports = router;

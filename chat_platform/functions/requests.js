@@ -21,14 +21,14 @@ requestTool.post = (url = "", body = {}) => {
 };
 
 // Used to send a post HTTP request with a body
-requestTool.get = (url = "", callback) => {
+requestTool.get = (url = "", body = {}) => {
   return new Promise((resolve, reject) => {
     request(
         {
           url: "http://" + url,
           method: "GET",
-          // json: true, // <--Very important!!!
-          // body: body,
+          json: true, // <--Very important!!!
+          body: body,
         },
         function (error, response, body) {
             if(error) reject(error);

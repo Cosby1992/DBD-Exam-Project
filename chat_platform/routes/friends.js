@@ -23,7 +23,7 @@ router.get("/", function (req, res, next) {
   
     requestTool.get("localhost:8001/friends/all?id=" + req.query.id).then(result => {
         res.status(result.response.statusCode);
-        res.json(JSON.parse(result.body));
+        res.json(result.body);
     }).catch(err => {
         res.status(500);
         res.json({error: "Failed to contact graph database.", message: err})
@@ -34,7 +34,15 @@ router.get("/", function (req, res, next) {
 
 /* GET - Get friend recommendations */
 router.get("/recommendations", function (req, res, next) {
-  res.status(200).json({ message: "OK" });
+
+    requestTool.get("localhost:8001/friends/recommendations?id=" + req.query.id).then(result => {
+        res.status(result.response.statusCode);
+        res.json(result.body);
+    }).catch(err => {
+        res.status(500);
+        res.json({error: "Failed to contact graph database.", message: err})
+    })
+
 });
 
 /* DELETE - Delete friends relation */

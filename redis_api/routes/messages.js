@@ -36,7 +36,7 @@ router.post("/", function (req, res, next) {
 });
 
 router.get("/", function (req, res, next) {
-  if (!req.body.from || !req.body.to) {
+  if (!req.query.from || !req.query.to) {
     res.status(400);
     res.json({ error: "Missing parameter: message, from or to" });
     return;
@@ -56,7 +56,7 @@ router.get("/", function (req, res, next) {
     return;
   });
 
-  client.KEYS(`message:${req.body.from}:${req.body.to}:*`, (error, keys) => {
+  client.KEYS(`message:${req.query.from}:${req.query.to}:*`, (error, keys) => {
     if (error) {
       res.status(500);
       res.json(error);
@@ -72,14 +72,14 @@ router.get("/", function (req, res, next) {
 
       messages.forEach((message, index) => {
         messageResult.messages.push({
-          user: req.body.from,
+          user: req.query.from,
           timestamp: keys[index].split(":")[3],
           message: message,
         });
       });
 
       client.KEYS(
-        `message:${req.body.to}:${req.body.from}:*`,
+        `message:${req.query.to}:${req.query.from}:*`,
         (error2, keys2) => {
           if (error2) {
             res.status(500);
@@ -96,7 +96,7 @@ router.get("/", function (req, res, next) {
 
             messages.forEach((message, index) => {
               messageResult2.messages.push({
-                user: req.body.to,
+                user: req.query.to,
                 timestamp: keys2[index].split(":")[3],
                 message: message,
               });

@@ -92,7 +92,7 @@ router.post("/", async (req, res, next) => {
 
 /* GET -> GET USER <EMAIL> */
 router.get("/", async (req, res, next) => {
-  // Database Name
+
   const client = new MongoClient(url, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
